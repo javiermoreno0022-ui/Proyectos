@@ -1,0 +1,19 @@
+{
+    "name": "javier/taskboard",
+    "description": "Proyecto integrador de Integracion de Sistemas",
+    "authors": [
+        {
+            "name": "javiermoreno0022-ui",
+            "email": "javier.moreno0022@gmail.com"
+        }
+    ],
+    "require": {
+        "nesbot/carbon": "^3.13",
+        "ramsey/uuid": "^4.9"
+    },
+    "autoload": { 
+        "psr-4": { 
+            "App\\": "src/" 
+        } 
+    } 
+}
