@@ -15,11 +15,12 @@ class TransaccionResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'      => $this->id,
-            'cliente' => $this->cliente_nombre,
-            'monto'   => (float) $this->monto,
-            'estado'  => $this->estado,
-            'fecha'   => $this->created_at?->toIso8601String(),
+        'id'          => $this->id,
+        'comercio_id' => $this->comercio_id,
+        'cliente'     => $this->cliente_nombre,
+        'monto'       => (float) $this->monto,
+        'estado'      => $this->estado,
+        'fecha'       => $this->created_at?->toIso8601String(),
         ];
     }
 }

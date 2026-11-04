@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tienda en línea · TaskBoard</title>
+</head>
+<body>
+    <h1>Tienda en línea · Mis comercios en TaskBoard</h1>
+
+    <section id="login">
+        <label for="email">Correo:</label>
+        <input id="email" type="email" value="ana@taskboard.test">
+
+        <label for="password">Contraseña:</label>
+        <input id="password" type="password" value="password123">
+
+        <button id="entrar">Entrar</button>
+    </section>
+
+    <section id="panel" hidden>
+        <h2>Mis comercios</h2>
+        <ul id="comercios"></ul>
+        <button id="salir">Salir</button>
+    </section>
+
+    <p id="mensaje"></p>
+
+    <script>
+        const base = '/api';
+        let token = null;
+
+        const login = document.querySelector('#login');
+        const panel = document.querySelector('#panel');
+        const mensaje = document.querySelector('#mensaje');
+        const lista = document.querySelector('#comercios');
+
+        function mostrarLogin(texto = '') {
+            token = null;
+            login.hidden = false;
+            panel.hidden = true;
+            lista.replaceChildren();
+            mensaje.textContent = texto;
+        }
+
+        async function manejar401(respuesta) {
+            if (respuesta.status === 401) {
+                mostrarLogin('Sesión vencida o no autorizada. Inicia sesión nuevamente.');
+                return true;
+            }
+
+            return false;
+        }
+
+        document.querySelector('#entrar').addEventListener('click', async () => {
+            mensaje.textContent = '';
+            lista.replaceChildren();
+
+            const respuesta = await fetch(`${base}/login`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: document.querySelector('#email').value,
+                    password: document.querySelector('#password').value,
+                    dispositivo: 'cliente-web'
+                })
+            });
+
+            if (respuesta.status === 422) {
+                mostrarLogin('Credenciales incorrectas (422)');
+                return;
+            }
+
+            if (!respuesta.ok) {
+                mostrarLogin(`Error al iniciar sesión (${respuesta.status})`);
+                return;
+            }
+
+            const datosLogin = await respuesta.json();
+            token = datosLogin.token;
+
+            login.hidden = true;
+            panel.hidden = false;
+
+            const comerciosRespuesta = await fetch(`${base}/comercios`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (await manejar401(comerciosRespuesta)) return;
+
+            if (!comerciosRespuesta.ok) {
+                mostrarLogin(`Error al consultar comercios (${comerciosRespuesta.status})`);
+                return;
+            }
+
+            const transaccionesRespuesta = await fetch(
+                `${base}/transacciones?estado=Completada`,
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (await manejar401(transaccionesRespuesta)) return;
+
+            if (!transaccionesRespuesta.ok) {
+                mostrarLogin(`Error al consultar transacciones (${transaccionesRespuesta.status})`);
+                return;
+            }
+
+            const datosComercios = await comerciosRespuesta.json();
+            const datosTransacciones = await transaccionesRespuesta.json();
+
+            const conteos = {};
+
+            datosTransacciones.data.forEach(transaccion => {
+                conteos[transaccion.comercio_id] =
+                    (conteos[transaccion.comercio_id] || 0) + 1;
+            });
+
+            datosComercios.data.forEach(comercio => {
+                const li = document.createElement('li');
+                const cantidad = conteos[comercio.id] || 0;
+
+                li.textContent =
+                    `${comercio.nombre} · ${comercio.rubro} · ${cantidad} transacción(es) completada(s)`;
+
+                lista.appendChild(li);
+            });
+        });
+
+        document.querySelector('#salir').addEventListener('click', async () => {
+            if (!token) return;
+
+            const respuesta = await fetch(`${base}/logout`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (await manejar401(respuesta)) return;
+
+            if (respuesta.status === 204) {
+                mostrarLogin('Sesión cerrada correctamente.');
+            } else {
+                mensaje.textContent = `Error al cerrar sesión (${respuesta.status})`;
+            }
+        });
+    </script>
+</body>
+</html>

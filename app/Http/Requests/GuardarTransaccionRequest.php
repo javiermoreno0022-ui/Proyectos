@@ -17,7 +17,8 @@ class GuardarTransaccionRequest extends FormRequest
         return [
             'comercio_id' => [
             'required',
-            Rule::exists('comercios', 'id'),
+            Rule::exists('comercios', 'id')
+            ->where('user_id', $this->user()->id),
             ],
 
             'cliente_nombre' => [
