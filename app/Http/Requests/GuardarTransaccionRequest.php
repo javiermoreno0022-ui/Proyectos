@@ -28,16 +28,14 @@ class GuardarTransaccionRequest extends FormRequest
             ],
 
             'monto' => [
-                'required',
-                'numeric',
-                'min:0.01',
+            'required',
+            'numeric',
+            'decimal:0,2',
+            'min:0.01',
+            'max:99999999.99'
             ],
-
-            'estado' => [
-            'sometimes',
-            'string',
-            Rule::in(['Iniciada', 'Completada', 'Fallida']),
-            ],
+            
+            'estado' => ['prohibited'],
         ];
     }
 
@@ -54,6 +52,10 @@ class GuardarTransaccionRequest extends FormRequest
             'monto.required' => 'Debes indicar un monto.',
             'monto.numeric' => 'El monto debe ser un número.',
             'monto.min' => 'El monto debe ser mayor a cero.',
+
+            'monto.max' => 'El monto no puede superar 99,999,999.99.',
+            'monto.decimal' => 'El monto admite como máximo dos decimales.',
+            'estado.prohibited' => 'El estado no se envía al crear: toda transacción nace Iniciada.',
         ];
     }
 
