@@ -1,0 +1,35 @@
+meta {
+  name: CL-11 · cliente_nombre con solo espacios
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{host}}/transacciones
+  body: json
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+body:json {
+  {
+    "comercio_id": 1,
+    "cliente_nombre": "     ",
+    "monto": 25.50
+  }
+}
+
+tests {
+  test("CL-11 responde 422", function () {
+      expect(res.getStatus()).to.equal(422);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+  forwardAuthorizationHeader: false
+}
