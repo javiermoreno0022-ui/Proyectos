@@ -1,0 +1,20 @@
+meta {
+  name: M-2
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host}}/transacciones/filtrar?monto_max=100
+  body: none
+  auth: inherit
+}
+
+params:query {
+  monto_max: 100
+}
+
+settings {
+  encodeUrl: true
+  forwardAuthorizationHeader: false
+}

@@ -40,6 +40,11 @@ Route::middleware('auth:sanctum')->group(function () {
     return new ComercioResource($comercio->load('transacciones'));
     });
 
+    Route::get(
+    '/transacciones/filtrar',
+    [TransaccionApiController::class, 'filtrar']
+    );
+
     Route::apiResource('transacciones', TransaccionApiController::class);
 
 });

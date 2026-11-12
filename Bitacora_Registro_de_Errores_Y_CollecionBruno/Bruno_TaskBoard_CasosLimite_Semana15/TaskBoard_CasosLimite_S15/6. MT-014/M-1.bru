@@ -1,0 +1,21 @@
+meta {
+  name: M-1
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{host}}/transacciones/filtrar?monto_min=20
+  body: none
+  auth: inherit
+}
+
+params:query {
+  monto_min: 20
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+  forwardAuthorizationHeader: false
+}

@@ -1,0 +1,27 @@
+meta {
+  name: F-5 – Intento de inyección SQL
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:8000/api/transacciones/filtrar?estado=x%27%20OR%20%271%27%3D%271
+  body: none
+  auth: bearer
+}
+
+params:query {
+  estado: x%27%20OR%20%271%27%3D%271
+}
+
+auth:bearer {
+  token: 18|tmAjeH4vAJ73WMm3DJyEkEdXQUM3M0IulCWGEnMt0bcd5779
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+}

@@ -1,0 +1,27 @@
+meta {
+  name: Login Carlos
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://127.0.0.1:8000/api/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "carlos@taskboard.test",
+    "password": "password123",
+    "dispositivo": "bruno-casos-limite"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+}

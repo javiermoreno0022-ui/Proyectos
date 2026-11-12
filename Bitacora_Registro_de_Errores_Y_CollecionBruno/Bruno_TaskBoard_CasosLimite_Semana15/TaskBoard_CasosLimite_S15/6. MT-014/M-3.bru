@@ -1,0 +1,22 @@
+meta {
+  name: M-3
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{host}}/transacciones/filtrar?monto_min=50&monto_max=10
+  body: none
+  auth: inherit
+}
+
+params:query {
+  monto_min: 50
+  monto_max: 10
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+  forwardAuthorizationHeader: false
+}

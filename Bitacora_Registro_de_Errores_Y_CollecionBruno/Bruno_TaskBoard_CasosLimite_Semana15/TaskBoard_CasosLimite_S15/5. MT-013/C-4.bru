@@ -1,0 +1,20 @@
+meta {
+  name: C-4
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{host}}/transacciones?estado=completada
+  body: none
+  auth: inherit
+}
+
+params:query {
+  estado: completada
+}
+
+settings {
+  encodeUrl: true
+  forwardAuthorizationHeader: false
+}

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Transaccion;
 use App\Http\Resources\TransaccionResource;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class TransaccionApiController extends Controller
 {
@@ -16,7 +17,14 @@ class TransaccionApiController extends Controller
      */
     public function index(Request $request)
     {
-    $estado = $request->query('estado');
+    $datos = $request->validate([
+        'estado' => [
+            'nullable',
+            Rule::in(['Iniciada', 'Completada', 'Fallida']),
+        ],
+    ]);
+
+    $estado = $datos['estado'] ?? null;
 
     $transacciones = Transaccion::whereHas(
         'comercio',
@@ -28,6 +36,79 @@ class TransaccionApiController extends Controller
 
     return TransaccionResource::collection($transacciones);
     }
+
+    public function filtrar(Request $request)
+    {
+    $validated = $request->validate([
+        'estado' => [
+            'sometimes',
+            'nullable',
+            Rule::in(['Iniciada', 'Completada', 'Fallida']),
+        ],
+        'desde' => [
+            'sometimes',
+            'nullable',
+            'date_format:Y-m-d',
+        ],
+        'hasta' => [
+            'sometimes',
+            'nullable',
+            'date_format:Y-m-d',
+            'after_or_equal:desde',
+        ],
+        'monto_min' => ['nullable', 'numeric', 'min:0'],
+        'monto_max' => [
+        'nullable',
+        'numeric',
+        'min:0',
+        Rule::when(
+        $request->filled('monto_min'),
+        ['gte:monto_min']
+            ),
+        ],
+    ]);
+
+    $transacciones = Transaccion::whereHas(
+        'comercio',
+        fn ($q) => $q->where(
+            'user_id',
+            $request->user()->id
+        )
+    )
+        ->when(
+            !empty($validated['estado']),
+            fn ($q) => $q->where('estado', $validated['estado'])
+        )
+        ->when(
+            !empty($validated['desde']),
+            fn ($q) => $q->whereDate(
+                'created_at',
+                '>=',
+                $validated['desde']
+            )
+        )
+        ->when(
+            !empty($validated['hasta']),
+            fn ($q) => $q->whereDate(
+                'created_at',
+                '<=',
+                $validated['hasta']
+            )
+        )
+        ->when(
+        isset($validated['monto_min']),
+        fn ($q) => $q->where('monto', '>=', $validated['monto_min'])
+        )
+        ->when(
+        isset($validated['monto_max']),
+        fn ($q) => $q->where('monto', '<=', $validated['monto_max'])
+            )
+        ->latest()
+        ->get();
+
+    return TransaccionResource::collection($transacciones);
+    }
+
     private function autorizar(Transaccion $t): void
     {
         abort_unless($t->comercio->user_id === auth()->id(), 404);

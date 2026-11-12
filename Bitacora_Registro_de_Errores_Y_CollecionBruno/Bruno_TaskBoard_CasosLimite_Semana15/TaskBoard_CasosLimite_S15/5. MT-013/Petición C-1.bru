@@ -1,0 +1,20 @@
+meta {
+  name: Petición C-1
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{host}}/transacciones?estado=Pagada
+  body: none
+  auth: inherit
+}
+
+params:query {
+  estado: Pagada
+}
+
+settings {
+  encodeUrl: true
+  forwardAuthorizationHeader: false
+}

@@ -1,0 +1,20 @@
+meta {
+  name: M-4
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{host}}/transacciones/filtrar?monto_min=-5
+  body: none
+  auth: inherit
+}
+
+params:query {
+  monto_min: -5
+}
+
+settings {
+  encodeUrl: true
+  forwardAuthorizationHeader: false
+}

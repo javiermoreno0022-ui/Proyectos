@@ -1,0 +1,28 @@
+meta {
+  name: F-7 – Rango de fechas incorrecto
+  type: http
+  seq: 7
+}
+
+get {
+  url: http://localhost:8000/api/transacciones/filtrar?desde=2026-11-10&hasta=2026-11-01
+  body: none
+  auth: bearer
+}
+
+params:query {
+  desde: 2026-11-10
+  hasta: 2026-11-01
+}
+
+auth:bearer {
+  token: 18|tmAjeH4vAJ73WMm3DJyEkEdXQUM3M0IulCWGEnMt0bcd5779
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+}

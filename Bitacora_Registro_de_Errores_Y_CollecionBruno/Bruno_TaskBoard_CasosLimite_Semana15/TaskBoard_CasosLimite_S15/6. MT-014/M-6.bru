@@ -1,0 +1,21 @@
+meta {
+  name: M-6
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{host}}/transacciones/filtrar?estado=Completada&monto_min=20
+  body: none
+  auth: inherit
+}
+
+params:query {
+  estado: Completada
+  monto_min: 20
+}
+
+settings {
+  encodeUrl: true
+  forwardAuthorizationHeader: false
+}

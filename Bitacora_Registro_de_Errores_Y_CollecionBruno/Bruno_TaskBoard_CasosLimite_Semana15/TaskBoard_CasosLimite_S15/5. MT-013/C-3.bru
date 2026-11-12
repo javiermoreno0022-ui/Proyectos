@@ -1,0 +1,16 @@
+meta {
+  name: C-3
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{host}}/transacciones
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  forwardAuthorizationHeader: false
+}
