@@ -17,8 +17,7 @@ class GuardarTransaccionRequest extends FormRequest
         return [
             'comercio_id' => [
             'required',
-            Rule::exists('comercios', 'id')
-            ->where('user_id', $this->user()->id),
+            Rule::exists('comercios', 'id'),
             ],
 
             'cliente_nombre' => [
@@ -33,6 +32,10 @@ class GuardarTransaccionRequest extends FormRequest
             'decimal:0,2',
             'min:0.01',
             'max:99999999.99'
+            ],
+            'metodo' => [
+            'required',
+            Rule::in(['tarjeta', 'transferencia', 'billetera']),
             ],
             
             'estado' => ['prohibited'],
@@ -56,6 +59,9 @@ class GuardarTransaccionRequest extends FormRequest
             'monto.max' => 'El monto no puede superar 99,999,999.99.',
             'monto.decimal' => 'El monto admite como máximo dos decimales.',
             'estado.prohibited' => 'El estado no se envía al crear: toda transacción nace Iniciada.',
+
+            'metodo.required' => 'Debes seleccionar un método de pago.',
+            'metodo.in' => 'El metodo de pago debe ser tarjeta, transferencia o billetera.',
         ];
     }
 
@@ -65,6 +71,7 @@ class GuardarTransaccionRequest extends FormRequest
             'cliente_nombre' => 'nombre del cliente',
             'monto' => 'monto de la transacción',
             'comercio_id' => 'comercio',
+            'metodo' => 'método de pago',
         ];
     }
 }

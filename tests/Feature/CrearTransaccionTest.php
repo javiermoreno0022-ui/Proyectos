@@ -7,6 +7,7 @@ use App\Models\Transaccion;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use App\Enums\EstadoTransaccion;
 
 class CrearTransaccionTest extends TestCase
 {
@@ -24,7 +25,8 @@ class CrearTransaccionTest extends TestCase
             'comercio_id'    => 1,
             'cliente_nombre' => 'Luis',
             'monto'          => 25.50,
-        ], $datos));
+            'metodo'         => 'tarjeta',
+            ], $datos));
     }
 
     public function test_cl02_monto_cero_responde_422(): void
@@ -50,7 +52,7 @@ class CrearTransaccionTest extends TestCase
 
     public function test_e03_estado_prohibido(): void
     {
-        $this->crear(['estado' => 'Completada'])
+        $this->crear(['estado' => EstadoTransaccion::Completada->value])
             ->assertStatus(422)
             ->assertJsonValidationErrors('estado');
     }

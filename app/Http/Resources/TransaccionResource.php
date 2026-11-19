@@ -19,7 +19,7 @@ class TransaccionResource extends JsonResource
         'comercio_id' => $this->comercio_id,
         'cliente'     => $this->cliente_nombre,
         'monto'       => (float) $this->monto,
-        'estado'      => $this->estado,
+        'estado' => $this->estado->value,
         'fecha'       => $this->created_at?->toIso8601String(),
         ];
     }

@@ -4,23 +4,28 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GuardarTransaccionRequest;
+use App\Http\Requests\UpdateTransaccionRequest;
+use App\Services\TransaccionService;
 use Illuminate\Http\Request;
 use App\Models\Transaccion;
 use App\Http\Resources\TransaccionResource;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Enums\EstadoTransaccion;
 
 class TransaccionApiController extends Controller
 {
+    public function __construct(
+    private TransaccionService $servicio
+    ) {}
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-    $datos = $request->validate([
+        $datos = $request->validate([
         'estado' => [
-            'nullable',
-            Rule::in(['Iniciada', 'Completada', 'Fallida']),
+        'nullable',
+        Rule::enum(EstadoTransaccion::class),
         ],
     ]);
 
@@ -41,9 +46,9 @@ class TransaccionApiController extends Controller
     {
     $validated = $request->validate([
         'estado' => [
-            'sometimes',
-            'nullable',
-            Rule::in(['Iniciada', 'Completada', 'Fallida']),
+        'sometimes',
+        'nullable',
+        Rule::enum(EstadoTransaccion::class),
         ],
         'desde' => [
             'sometimes',
@@ -118,22 +123,12 @@ class TransaccionApiController extends Controller
      */
     public function store(GuardarTransaccionRequest $request)
     {
-    $datos = $request->validated();
+    $transaccion = $this->servicio->registrar(
+        $request->user(),
+        $request->validated()
+    );
 
-    $datos['estado'] = 'Iniciada';
-
-    $t = DB::transaction(function () use ($datos) {
-        $t = Transaccion::create($datos);
-
-        $t->eventos()->create([
-            'tipo_evento' => 'creacion',
-            'detalle'     => 'Transacción iniciada',
-        ]);
-
-        return $t;
-    });
-
-    return (new TransaccionResource($t))
+    return (new TransaccionResource($transaccion))
         ->response()
         ->setStatusCode(201);
     }
@@ -151,9 +146,15 @@ class TransaccionApiController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateTransaccionRequest $request, Transaccion $transaccione)
     {
-        //
+    return new TransaccionResource(
+        $this->servicio->cambiarEstado(
+            $request->user(),
+            $transaccione,
+            EstadoTransaccion::from($request->validated()['estado'])
+            )
+        );
     }
 
     /**
@@ -166,5 +167,5 @@ class TransaccionApiController extends Controller
     $transaccione->delete();
 
     return response()->noContent();
-    }
+        }
 }

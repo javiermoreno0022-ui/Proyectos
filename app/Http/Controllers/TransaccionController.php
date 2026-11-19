@@ -7,9 +7,14 @@ use App\Models\Transaccion;
 use App\Http\Requests\GuardarTransaccionRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Enums\EstadoTransaccion;
+use App\Services\TransaccionService;
 
 class TransaccionController extends Controller
 {
+    public function __construct(
+    private TransaccionService $servicio
+    ) {}
     private function autorizar(Transaccion $t): void
     {
         abort_unless($t->comercio->user_id === Auth::id(), 404);
@@ -81,36 +86,21 @@ class TransaccionController extends Controller
     }
 
     // Cambiar el estado de una transacción
+    // Cambiar el estado de una transacción
     public function moverEstado(Transaccion $transaccion, string $estado)
     {
-        $this->autorizar($transaccion);
+    $this->autorizar($transaccion);
 
-        $transiciones = [
-            'Iniciada'   => ['Completada', 'Fallida'],
-            'Completada' => [],
-            'Fallida'    => ['Iniciada'],
-        ];
+    $nuevoEstado = EstadoTransaccion::tryFrom($estado);
 
-        $validos = ['Iniciada', 'Completada', 'Fallida'];
+    if (!$nuevoEstado) {
+        abort(400, 'Estado no válido.');
+    }
 
-        if (!in_array($estado, $validos)) {
-            abort(400, 'Estado no válido.');
-        }
+    $this->servicio->moverEstado($transaccion, $nuevoEstado);
 
-        if (!in_array(
-            $estado,
-            $transiciones[$transaccion->estado] ?? []
-        )) {
-            abort(
-                400,
-                "No se puede mover de {$transaccion->estado} a {$estado}."
-            );
-        }
-
-        $transaccion->update(['estado' => $estado]);
-
-        return redirect()
-            ->route('comercios.show', $transaccion->comercio_id)
-            ->with('mensaje', "Transacción movida a {$estado}.");
+    return redirect()
+        ->route('comercios.show', $transaccion->comercio_id)
+        ->with('mensaje', "Transacción movida a {$nuevoEstado->value}.");
     }
 }
